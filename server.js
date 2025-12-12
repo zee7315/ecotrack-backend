@@ -6,18 +6,36 @@ require('dotenv').config();
 // Import routes
 const projectRoutes = require('./routes/projectRoutes');
 
-// Initialize Express app
+// Initialize Express app - MUST COME FIRST
+const app = express();
+
+// CORS Configuration
 const corsOptions = {
-  origin: [
-    'http://localhost:3000', 
-    'https://your-frontend-url.vercel.app', // Add after deployment
-    'https://ecotrack-frontend.vercel.app'  // Example
-  ],
-  optionsSuccessStatus: 200
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins in development
+    if (process.env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    
+    // In production, you can specify allowed origins
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://your-frontend.vercel.app' // Add your frontend URL later
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
 };
 
 // Middleware
-app.use(cors(corsOptions));
+app.use(cors());  // Use simple CORS for now, fix later
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
